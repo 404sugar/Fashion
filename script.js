@@ -5,25 +5,37 @@ async function unlock() {
   try {
     const res = await fetch("fashioncrypt.txt");
     const rawText = await res.text();
+
+    console.log("Raw encrypted text:", rawText);
+
     const encryptedToken = rawText.replace(/^\uFEFF/, '').trim();
+    console.log("Trimmed encrypted token:", encryptedToken);
 
     const decrypted = CryptoJS.AES.decrypt(encryptedToken, password);
-    const plain = decrypted.toString(CryptoJS.enc.Utf8).replace(/[^\x20-\x7E]/g, '').trim();
+    const plain = decrypted.toString(CryptoJS.enc.Utf8);
 
-    console.log("Decrypted value:", plain);
+    console.log("Decrypted raw string:", plain);
 
-    if (!plain || (!plain.startsWith("ghp_") && !plain.startsWith("github_pat_"))) {
-      console.warn("Decrypted string didn't match token prefix.");
-      alert("Failed to unlock: token format is invalid.");
+    const cleaned = plain.replace(/[^\x20-\x7E]/g, '').trim();
+    console.log("Cleaned token:", cleaned);
+
+    // DEBUG: Show prefix match
+    console.log("Starts with github_pat_?", cleaned.startsWith("github_pat_"));
+    console.log("Starts with ghp_?", cleaned.startsWith("ghp_"));
+
+    if (!cleaned || (!cleaned.startsWith("github_pat_") && !cleaned.startsWith("ghp_"))) {
+      alert("Decrypted but token format not recognized. Check prefix manually in console.");
+      token = cleaned; // Still assign for testing
+      document.getElementById('uploadUI').style.display = 'block';
       return;
     }
 
-    token = plain;
+    token = cleaned;
     document.getElementById('uploadUI').style.display = 'block';
     alert("Unlocked successfully.");
   } catch (err) {
     alert("Failed to unlock: wrong password or corrupt token.");
-    console.error(err);
+    console.error("Decryption failed:", err);
   }
 }
 
