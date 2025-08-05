@@ -9,6 +9,7 @@ async function unlock() {
 
     const decrypted = CryptoJS.AES.decrypt(encryptedToken, password);
     const plain = decrypted.toString(CryptoJS.enc.Utf8).replace(/^\uFEFF/, '').trim();
+    console.log("Decrypted value:", plain);
 
     console.log("Decrypted value:", plain);
 
