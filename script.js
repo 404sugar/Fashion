@@ -5,22 +5,20 @@ async function unlock() {
   try {
     const res = await fetch("fashioncrypt.txt");
     const rawText = await res.text();
-    console.log("Raw encrypted text:", rawText);
-
     const encryptedToken = rawText.replace(/^\uFEFF/, '').trim();
-    console.log("Trimmed encrypted token:", encryptedToken);
 
     const decrypted = CryptoJS.AES.decrypt(encryptedToken, password);
-    const plain = decrypted.toString(CryptoJS.enc.Utf8);
-    const cleaned = plain.replace(/^\uFEFF/, '').trim();
-    console.log("Decrypted value:", cleaned);
+    const plain = decrypted.toString(CryptoJS.enc.Utf8).replace(/[^\x20-\x7E]/g, '').trim();
 
-    if (!cleaned.startsWith("ghp_") && !cleaned.startsWith("github_pat_")) {
-      console.warn("Decrypted string does not start with expected token prefix.");
-      throw "Invalid token";
+    console.log("Decrypted value:", plain);
+
+    if (!plain || (!plain.startsWith("ghp_") && !plain.startsWith("github_pat_"))) {
+      console.warn("Decrypted string didn't match token prefix.");
+      alert("Failed to unlock: token format is invalid.");
+      return;
     }
 
-    token = cleaned;
+    token = plain;
     document.getElementById('uploadUI').style.display = 'block';
     alert("Unlocked successfully.");
   } catch (err) {
