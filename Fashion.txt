@@ -1,2 +1,3 @@
 {"./Pics/1754376591073_OTTOLINGER1.png", "afsd", "sdfa", "2.3", "dfsasfsadsdf"}
 {"./Pics/1754376658313_remove_watermark_test0.png", "sdafdfsadfsa", "fddfdfdfdf", "3.1", "dfsa waow"}
+{"./Pics/1754377355708_OTTOLINGER1.png", "OTTOLINGER", "Spring Summer 2023", "3.5", "Such a stunning vision, but the presentation didn't deliver its potential impact. The music was so badly chosen for the style of designs on this runway."}
