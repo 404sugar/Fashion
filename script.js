@@ -4,7 +4,9 @@ let token = "";
     const password = document.getElementById('password').value;
     try {
       const res = await fetch("https://ava-music.org/fashioncrypt.txt");
-      const encryptedToken = (await res.text()).trim();
+      const rawText = await res.text();
+      const encryptedToken = rawText.replace(/^\uFEFF/, '').trim(); // Remove BOM if present
+
 
       const decrypted = CryptoJS.AES.decrypt(encryptedToken, password);
       const plain = decrypted.toString(CryptoJS.enc.Utf8);
