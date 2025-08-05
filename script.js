@@ -72,8 +72,17 @@ async function upload() {
         headers: { Authorization: `token ${token}` }
       });
       const data = await res.json();
-      const cleanBase64 = data.content.replace(/\n/g, '').trim();
-      const content = atob(cleanBase64) + newEntry;
+      const rawContent = (data.content || '').replace(/\n/g, '').trim();
+
+      let decoded = "";
+      try {
+        decoded = rawContent ? atob(rawContent) : "";
+      } catch (decodeErr) {
+        console.warn("Base64 decode failed. Falling back to empty string.");
+      }
+
+      const content = decoded + newEntry;
+
 
       // Push updated Fashion.txt
       await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/Fashion.txt`, {
