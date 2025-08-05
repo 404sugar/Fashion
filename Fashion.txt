@@ -1,1 +1,2 @@
 {"./Pics/1754376591073_OTTOLINGER1.png", "afsd", "sdfa", "2.3", "dfsasfsadsdf"}
+{"./Pics/1754376658313_remove_watermark_test0.png", "sdafdfsadfsa", "fddfdfdfdf", "3.1", "dfsa waow"}
