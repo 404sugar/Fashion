@@ -72,7 +72,8 @@ async function upload() {
         headers: { Authorization: `token ${token}` }
       });
       const data = await res.json();
-      const content = atob(data.content) + newEntry;
+      const cleanBase64 = data.content.replace(/\n/g, '').trim();
+      const content = atob(cleanBase64) + newEntry;
 
       // Push updated Fashion.txt
       await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/Fashion.txt`, {
