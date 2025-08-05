@@ -3,13 +3,14 @@ let token = "";
 async function unlock() {
   const password = document.getElementById('password').value;
   try {
-    // Read encrypted token from a local file in your GitHub Pages repo
     const res = await fetch("fashioncrypt.txt");
     const rawText = await res.text();
-    const encryptedToken = rawText.replace(/^\uFEFF/, '').trim(); // Remove BOM if present
+    const encryptedToken = rawText.replace(/^\uFEFF/, '').trim();
 
     const decrypted = CryptoJS.AES.decrypt(encryptedToken, password);
-    const plain = decrypted.toString(CryptoJS.enc.Utf8);
+    const plain = decrypted.toString(CryptoJS.enc.Utf8).replace(/^\uFEFF/, '').trim();
+
+    console.log("Decrypted value:", plain);
 
     if (!plain.startsWith("ghp_")) throw "Invalid token";
 
