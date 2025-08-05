@@ -2,31 +2,25 @@ let token = "";
 
 async function unlock() {
   const password = document.getElementById('password').value;
+
   try {
     const res = await fetch("fashioncrypt.txt");
     const rawText = await res.text();
 
-    console.log("Raw encrypted text:", rawText);
-
+    // Clean encrypted token
     const encryptedToken = rawText.replace(/^\uFEFF/, '').trim();
-    console.log("Trimmed encrypted token:", encryptedToken);
 
+    // Decrypt and clean result
     const decrypted = CryptoJS.AES.decrypt(encryptedToken, password);
     const plain = decrypted.toString(CryptoJS.enc.Utf8);
+    const cleaned = plain.replace(/[^\x20-\x7E]/g, '').trim(); // Keep printable ASCII
 
-    console.log("Decrypted raw string:", plain);
+    // Optional: Log for troubleshooting
+    // console.log("Decrypted token:", cleaned);
 
-    const cleaned = plain.replace(/[^\x20-\x7E]/g, '').trim();
-    console.log("Cleaned token:", cleaned);
-
-    // DEBUG: Show prefix match
-    console.log("Starts with github_pat_?", cleaned.startsWith("github_pat_"));
-    console.log("Starts with ghp_?", cleaned.startsWith("ghp_"));
-
-    if (!cleaned || (!cleaned.startsWith("github_pat_") && !cleaned.startsWith("ghp_"))) {
-      alert("Decrypted but token format not recognized. Check prefix manually in console.");
-      token = cleaned; // Still assign for testing
-      document.getElementById('uploadUI').style.display = 'block';
+    // Validate token prefix (GitHub tokens start with 'ghp_' or 'github_pat_')
+    if (!cleaned || (!cleaned.startsWith("ghp_") && !cleaned.startsWith("github_pat_"))) {
+      alert("Token decrypted but format is unrecognized.");
       return;
     }
 
@@ -34,31 +28,33 @@ async function unlock() {
     document.getElementById('uploadUI').style.display = 'block';
     alert("Unlocked successfully.");
   } catch (err) {
-    alert("Failed to unlock: wrong password or corrupt token.");
-    console.error("Decryption failed:", err);
+    alert("Failed to unlock: wrong password or corrupted token.");
+    console.error("Decryption error:", err);
   }
 }
-
 
 async function upload() {
   const repo = 'Fashion';
   const owner = '404sugar';
+
   const imageFile = document.getElementById('imageFile').files[0];
-  const designer = document.getElementById('designer').value;
-  const collection = document.getElementById('collection').value;
-  const rating = document.getElementById('rating').value;
-  const review = document.getElementById('review').value;
+  const designer = document.getElementById('designer').value.trim();
+  const collection = document.getElementById('collection').value.trim();
+  const rating = document.getElementById('rating').value.trim();
+  const review = document.getElementById('review').value.trim();
 
   if (!imageFile) return alert("No image selected.");
+  if (!designer || !collection || !rating || !review) return alert("Please fill in all fields.");
 
   const reader = new FileReader();
+
   reader.onload = async () => {
     const base64 = reader.result.split(',')[1];
     const imgName = `${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
     const newEntry = `{"./Pics/${imgName}", "${designer}", "${collection}", "${rating}", "${review.replace(/\n/g, '\\n')}"}\n`;
 
     try {
-      // Upload image
+      // Upload image to /Pics
       await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/Pics/${imgName}`, {
         method: 'PUT',
         headers: {
@@ -71,13 +67,14 @@ async function upload() {
         })
       });
 
-      // Get and update Fashion.txt
+      // Fetch Fashion.txt
       const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/Fashion.txt`, {
         headers: { Authorization: `token ${token}` }
       });
       const data = await res.json();
       const content = atob(data.content) + newEntry;
 
+      // Push updated Fashion.txt
       await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/Fashion.txt`, {
         method: 'PUT',
         headers: {
@@ -93,7 +90,7 @@ async function upload() {
 
       alert("Upload complete!");
 
-      // Reset the form
+      // Reset form
       document.getElementById('imageFile').value = "";
       document.getElementById('designer').value = "";
       document.getElementById('collection').value = "";
@@ -101,8 +98,8 @@ async function upload() {
       document.getElementById('review').value = "";
 
     } catch (err) {
-      alert("Upload failed: " + err);
-      console.error(err);
+      alert("Upload failed: " + err.message);
+      console.error("Upload error:", err);
     }
   };
 
