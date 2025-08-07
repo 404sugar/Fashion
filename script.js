@@ -93,7 +93,7 @@ async function upload() {
         },
         body: JSON.stringify({
           message: `Update Fashion.txt with ${imgName}`,
-          content: btoa(content),
+          content: btoa(unescape(encodeURIComponent(content))),
           sha: data.sha
         })
       });
