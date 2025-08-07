@@ -75,11 +75,14 @@ async function upload() {
       const rawContent = (data.content || '').replace(/\n/g, '').trim();
 
       let decoded = "";
-      try {
-        decoded = rawContent ? atob(rawContent) : "";
-      } catch (decodeErr) {
-        console.warn("Base64 decode failed. Falling back to empty string.");
-      }
+try {
+  decoded = rawContent
+    ? decodeURIComponent(escape(atob(rawContent)))
+    : "";
+    } catch (decodeErr) {
+      console.warn("Base64 decode failed. Falling back to empty string.");
+    }
+
 
       const content = decoded + newEntry;
 
